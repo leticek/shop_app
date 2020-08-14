@@ -32,7 +32,7 @@ class CartProvider with ChangeNotifier {
         (existingCartItem) => CartItem(
             id: existingCartItem.id,
             price: existingCartItem.price,
-            quantity: existingCartItem.quantity + 1,
+            quantity: (existingCartItem.quantity + 1),
             product: product),
       );
     } else {
@@ -45,12 +45,33 @@ class CartProvider with ChangeNotifier {
             product: product),
       );
     }
+    notifyListeners();
+  }
+
+  void removeItem(CartItem item) {
+    _items.removeWhere((key, value) => value.id == item.id);
+    notifyListeners();
+  }
+
+  double get totalPrice {
+    if (_items == null) {
+      return 0.0;
+    }
+    double totalPrice = 0.0;
+    _items.forEach((key, value) {
+      totalPrice += value.price * value.quantity;
+    });
+
+    return totalPrice;
   }
 
   int get itemsInCart {
-    int quantity;
+    if (_items == null) {
+      return 0;
+    }
+    int quantity = 0;
     _items.forEach((key, value) {
-      quantity += _items[key].quantity;
+      quantity += value.quantity;
     });
 
     return quantity;

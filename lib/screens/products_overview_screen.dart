@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/providers/cart_provider.dart';
+import 'package:shop_app/screens/cart_screen.dart';
 import 'package:shop_app/widgets/badge.dart';
 
 import '../widgets/products_grid.dart';
@@ -16,15 +17,23 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   bool _showFavorites = false;
   @override
   Widget build(BuildContext context) {
-    CartProvider cart = Provider.of<CartProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('My Shop'),
         actions: [
-          Badge(
-            child:
-                IconButton(icon: Icon(Icons.shopping_cart), onPressed: () {}),
-            value: cart.itemsInCart.toString(),
+          Consumer<CartProvider>(
+            builder: (_, cartData, ch) => Badge(
+              child: ch,
+              value: cartData.itemsInCart.toString(),
+            ),
+            child: IconButton(
+              icon: Icon(
+                Icons.shopping_cart,
+              ),
+              onPressed: () {
+                Navigator.of(context).pushNamed(CartScreen.routeName);
+              },
+            ),
           ),
           PopupMenuButton(
             onSelected: (FilterOptions selectedValue) => setState(() {
