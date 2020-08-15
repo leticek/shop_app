@@ -45,6 +45,26 @@ class ProductItem extends StatelessWidget {
             ),
             onPressed: () {
               cart.addProduct(product);
+              Scaffold.of(context).removeCurrentSnackBar();
+              Scaffold.of(context).showSnackBar(
+                SnackBar(
+                  backgroundColor: Colors.white,
+                  content: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Card(
+                      color: Colors.white,
+                      elevation: 3,
+                      child: Text(
+                        '${product.title} has been added to the cart.',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
             },
           ),
           title: Text(
