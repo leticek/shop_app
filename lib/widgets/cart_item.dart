@@ -9,7 +9,7 @@ class CartItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    CartProvider tmp = Provider.of<CartProvider>(context);
+    CartProvider tmp = Provider.of<CartProvider>(context, listen: false);
     return Dismissible(
       direction: DismissDirection.endToStart,
       key: ValueKey(cartItem.id),
