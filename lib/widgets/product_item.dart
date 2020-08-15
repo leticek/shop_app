@@ -48,6 +48,10 @@ class ProductItem extends StatelessWidget {
               Scaffold.of(context).removeCurrentSnackBar();
               Scaffold.of(context).showSnackBar(
                 SnackBar(
+                  action: SnackBarAction(
+                    label: 'UNDO',
+                    onPressed: () => cart.removeSingleItem(product),
+                  ),
                   backgroundColor: Colors.white,
                   content: Padding(
                     padding: const EdgeInsets.all(8.0),
