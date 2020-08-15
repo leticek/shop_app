@@ -44,23 +44,34 @@ class CartScreen extends StatelessWidget {
                         'Order now',
                       ),
                       onPressed: () {
-                        Provider.of<OrderProvider>(context, listen: false)
-                            .addOrder(
-                                cart.items.values.toList(), cart.totalPrice);
-                        cart.clearCart();
                         showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
-                                  title: Text("Your order has been placed."),
+                                  title: Text("Place your order"),
+                                  content:
+                                      Text('Do you want to place your order?'),
                                   actions: <Widget>[
                                     FlatButton(
-                                      child: Text('Close'),
+                                      child: Text('Yes'),
                                       onPressed: () {
-                                        Navigator.of(context).pop();
+                                        Navigator.of(context).pop(true);
+                                      },
+                                    ),
+                                    FlatButton(
+                                      child: Text('No'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop(false);
                                       },
                                     )
                                   ],
-                                ));
+                                )).then((value) {
+                          if (value as bool) {
+                            Provider.of<OrderProvider>(context, listen: false)
+                                .addOrder(cart.items.values.toList(),
+                                    cart.totalPrice);
+                            cart.clearCart();
+                          }
+                        });
                       },
                     )
                   ],

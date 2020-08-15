@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shop_app/screens/orders_screen.dart';
+import 'package:shop_app/screens/product_management_screen.dart';
 
 class MyDrawer extends StatelessWidget {
   @override
@@ -46,6 +47,16 @@ class MyDrawer extends StatelessWidget {
             ),
             onPressed: () {
               Navigator.of(context).pushNamed(OrdersScreen.routeName);
+            },
+          ),
+          FlatButton(
+            child: ListTile(
+              leading: Icon(Icons.settings),
+              title: Text('Product Management'),
+            ),
+            onPressed: () {
+              Navigator.of(context)
+                  .pushNamed(UserProductsManagementScreen.routeName);
             },
           )
         ],
