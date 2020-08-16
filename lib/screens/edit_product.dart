@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shop_app/providers/product.dart';
+import 'package:shop_app/providers/products_provider.dart';
 
 class EditProductScreen extends StatefulWidget {
   static const routeName = '/edit-product';
@@ -21,6 +23,31 @@ class _EditProductScreenState extends State<EditProductScreen> {
     title: '',
   );
 
+  var _initialValues = {
+    'description': '',
+    'imageUrl': '',
+    'price': '0',
+    'title': '',
+  };
+
+  var _isInit = false;
+  var title = 'Add Product';
+
+  @override
+  void didChangeDependencies() {
+    if (!_isInit && ModalRoute.of(context).settings.arguments != null) {
+      _prod = ModalRoute.of(context).settings.arguments;
+      _initialValues['description'] = _prod.description;
+      _initialValues['imageUrl'] = _prod.imageUrl;
+      _initialValues['price'] = _prod.price.toString();
+      _initialValues['title'] = _prod.title;
+      title = 'Edit Product';
+      print(_initialValues);
+      _imgUrlController.text = _prod.imageUrl;
+    }
+    super.didChangeDependencies();
+  }
+
   @override
   void dispose() {
     _imgUrlFocusNode.dispose();
@@ -31,17 +58,19 @@ class _EditProductScreenState extends State<EditProductScreen> {
   void _saveForm() {
     _formKey.currentState.validate();
     _formKey.currentState.save();
-    print(_prod.title +
-        _prod.description +
-        _prod.imageUrl +
-        _prod.price.toString());
+    if (_prod.id != null) {
+      Provider.of<ProductsProvider>(context, listen: false).editProduct(_prod);
+    } else {
+      Provider.of<ProductsProvider>(context, listen: false).addProduct(_prod);
+    }
+    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Product'),
+        title: Text(title),
         actions: [
           IconButton(
               icon: Icon(Icons.save),
@@ -57,6 +86,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
           child: ListView(
             children: [
               TextFormField(
+                initialValue: _initialValues['title'],
                 decoration: InputDecoration(
                   labelText: 'Title',
                 ),
@@ -70,6 +100,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   imageUrl: _prod.imageUrl,
                   price: _prod.price,
                   title: newValue,
+                  isFavorite: _prod.isFavorite,
                 ),
                 validator: (val) {
                   if (val.isEmpty) {
@@ -79,6 +110,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 },
               ),
               TextFormField(
+                initialValue: _initialValues['description'],
                 keyboardType: TextInputType.multiline,
                 maxLines: 3,
                 decoration: InputDecoration(
@@ -92,9 +124,20 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   imageUrl: _prod.imageUrl,
                   price: _prod.price,
                   title: _prod.title,
+                  isFavorite: _prod.isFavorite,
                 ),
+                validator: (val) {
+                  if (val.isEmpty) {
+                    return 'Provide a description.';
+                  }
+                  if (val.length < 10) {
+                    return 'Provide a longer description.';
+                  }
+                  return null;
+                },
               ),
               TextFormField(
+                initialValue: _initialValues['price'],
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: 'Price',
@@ -109,7 +152,20 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   imageUrl: _prod.imageUrl,
                   price: double.parse(newValue),
                   title: _prod.title,
+                  isFavorite: _prod.isFavorite,
                 ),
+                validator: (val) {
+                  if (val.isEmpty) {
+                    return 'Please provide a price';
+                  }
+                  if (double.tryParse(val) == null) {
+                    return 'Please provide a valid number.';
+                  }
+                  if (double.parse(val) <= 0) {
+                    return 'Please provide a valid price.';
+                  }
+                  return null;
+                },
               ),
               Row(
                 children: [
@@ -152,6 +208,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         imageUrl: newValue,
                         price: _prod.price,
                         title: _prod.title,
+                        isFavorite: _prod.isFavorite,
                       ),
                     ),
                   )
