@@ -8,12 +8,20 @@ import './product.dart';
 class ProductsProvider with ChangeNotifier {
   List<Product> _productList = [];
   String _token;
+  String _userId;
 
   ProductsProvider();
 
   void setToken(String token) {
     if (_token != token) {
       _token = token;
+      notifyListeners();
+    }
+  }
+
+  void setUserId(String userId) {
+    if (_userId != userId) {
+      _userId = userId;
       notifyListeners();
     }
   }
@@ -37,31 +45,36 @@ class ProductsProvider with ChangeNotifier {
     return _productList.firstWhere((element) => element.id == productId);
   }
 
-  Future<void> fetchProducts() async {
-    final String url =
-        'https://shop-app-3529f.firebaseio.com/products.json?auth=$_token';
+  Future<void> fetchProducts({bool filterByUser = false}) async {
+    var url = filterByUser
+        ? 'https://shop-app-3529f.firebaseio.com/products.json?auth=$_token&orderBy="creatorId"&equalTo="$_userId"'
+        : 'https://shop-app-3529f.firebaseio.com/products.json?auth=$_token';
     try {
       final response = await http.get(url);
-      if (response.body != null) {
-        final data = json.decode(response.body) as Map<String, dynamic>;
-        List<Product> tmp = [];
-        data.forEach((key, value) {
-          tmp.add(
-            Product(
-              id: key,
-              description: value['description'],
-              imageUrl: value['imageUrl'],
-              price: value['price'],
-              title: value['title'],
-              isFavorite: value['isFavorite'],
-            ),
-          );
-          _productList = tmp;
-        });
-        notifyListeners();
+      final extractedData = json.decode(response.body) as Map<String, dynamic>;
+      if (extractedData == null) {
+        return;
       }
+      url =
+          'https://shop-app-3529f.firebaseio.com/userFavorites/$_userId.json?auth=$_token';
+      final favoriteResponse = await http.get(url);
+      final favoriteData = json.decode(favoriteResponse.body);
+      final List<Product> loadedProducts = [];
+      extractedData.forEach((prodId, prodData) {
+        loadedProducts.add(Product(
+          id: prodId,
+          title: prodData['title'],
+          description: prodData['description'],
+          price: prodData['price'],
+          isFavorite:
+              favoriteData == null ? false : favoriteData[prodId] ?? false,
+          imageUrl: prodData['imageUrl'],
+        ));
+      });
+      _productList = loadedProducts;
+      notifyListeners();
     } catch (error) {
-      throw error;
+      throw (error);
     }
   }
 
@@ -77,7 +90,7 @@ class ProductsProvider with ChangeNotifier {
             'description': prod.description,
             'price': prod.price,
             'imageUrl': prod.imageUrl,
-            'isFavorite': prod.isFavorite,
+            'creatorId': _userId,
           },
         ),
       );
