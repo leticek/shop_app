@@ -25,7 +25,6 @@ class Product with ChangeNotifier {
   });
 
   Future<void> toggleFavorite() async {
-    final oldStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
     final url = 'https://shop-app-3529f.firebaseio.com/products/$id.json';
@@ -40,7 +39,8 @@ class Product with ChangeNotifier {
       );
     } catch (error) {
       print(error);
-      isFavorite = oldStatus;
+      //isFavorite = oldStatus;
+      //notifyListeners();
     }
   }
 }

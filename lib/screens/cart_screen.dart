@@ -39,41 +39,7 @@ class CartScreen extends StatelessWidget {
                       label: Text('${cart.totalPrice.toStringAsFixed(2)}'),
                       backgroundColor: Theme.of(context).accentColor,
                     ),
-                    FlatButton(
-                      child: Text(
-                        'Order now',
-                      ),
-                      onPressed: () {
-                        showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                                  title: Text("Place your order"),
-                                  content:
-                                      Text('Do you want to place your order?'),
-                                  actions: <Widget>[
-                                    FlatButton(
-                                      child: Text('Yes'),
-                                      onPressed: () {
-                                        Navigator.of(context).pop(true);
-                                      },
-                                    ),
-                                    FlatButton(
-                                      child: Text('No'),
-                                      onPressed: () {
-                                        Navigator.of(context).pop(false);
-                                      },
-                                    )
-                                  ],
-                                )).then((value) {
-                          if (value as bool) {
-                            Provider.of<OrderProvider>(context, listen: false)
-                                .addOrder(cart.items.values.toList(),
-                                    cart.totalPrice);
-                            cart.clearCart();
-                          }
-                        });
-                      },
-                    )
+                    OrderButton(cart: cart)
                   ],
                 ),
               ),
@@ -89,5 +55,69 @@ class CartScreen extends StatelessWidget {
             )),
           ],
         ));
+  }
+}
+
+class OrderButton extends StatefulWidget {
+  const OrderButton({
+    @required this.cart,
+  });
+
+  final CartProvider cart;
+
+  @override
+  _OrderButtonState createState() => _OrderButtonState();
+}
+
+class _OrderButtonState extends State<OrderButton> {
+  var _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      child: _isLoading
+          ? CircularProgressIndicator()
+          : Text(
+              'Order now',
+            ),
+      onPressed: (widget.cart.totalPrice <= 0 || _isLoading)
+          ? null
+          : () {
+              setState(() {
+                _isLoading = true;
+              });
+              showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                        title: Text("Place your order"),
+                        content: Text('Do you want to place your order?'),
+                        actions: <Widget>[
+                          FlatButton(
+                            child: Text('Yes'),
+                            onPressed: () {
+                              Navigator.of(context).pop(true);
+                            },
+                          ),
+                          FlatButton(
+                            child: Text('No'),
+                            onPressed: () {
+                              Navigator.of(context).pop(false);
+                            },
+                          )
+                        ],
+                      )).then((value) {
+                if (value as bool) {
+                  Provider.of<OrderProvider>(context, listen: false).addOrder(
+                      widget.cart.items.values.toList(),
+                      widget.cart.totalPrice);
+                }
+              }).then((value) {
+                setState(() {
+                  _isLoading = false;
+                });
+                widget.cart.clearCart();
+              });
+            },
+    );
   }
 }

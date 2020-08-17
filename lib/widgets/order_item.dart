@@ -24,7 +24,7 @@ class _OrderItemState extends State<OrderItem> {
       child: Column(
         children: [
           ListTile(
-            title: Text('${widget.item.price.toString()}'),
+            title: Text('${widget.item.price.toStringAsFixed(2)}'),
             subtitle: Text(
               DateFormat('dd.MM.yyy hh:mm').format(widget.item.orderTime),
             ),
