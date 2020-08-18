@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shop_app/providers/auth.dart';
 import 'package:shop_app/screens/orders_screen.dart';
 import 'package:shop_app/screens/product_management_screen.dart';
 
@@ -57,6 +59,16 @@ class MyDrawer extends StatelessWidget {
             onPressed: () {
               Navigator.of(context)
                   .pushNamed(UserProductsManagementScreen.routeName);
+            },
+          ),
+          FlatButton(
+            child: ListTile(
+              leading: Icon(Icons.exit_to_app),
+              title: Text('Log out'),
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              Provider.of<Auth>(context, listen: false).logOut();
             },
           )
         ],

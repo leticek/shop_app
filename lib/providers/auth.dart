@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:shop_app/models/http_exception.dart';
 
@@ -8,6 +10,7 @@ class Auth with ChangeNotifier {
   String _token;
   DateTime _expirationTime;
   String _userId;
+  Timer _authTimer;
 
   bool get isAuthorized {
     return token != null;
@@ -27,6 +30,18 @@ class Auth with ChangeNotifier {
       return _userId;
     }
     return null;
+  }
+
+  Future<void> logOut() async {
+    _token = null;
+    _userId = null;
+    _expirationTime = null;
+    if (_authTimer != null) {
+      _authTimer.cancel();
+    }
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove('userData');
+    notifyListeners();
   }
 
   Future<void> signUp(String email, String password) async {
@@ -65,9 +80,45 @@ class Auth with ChangeNotifier {
           ),
         ),
       );
+      _autoLogOut();
       notifyListeners();
+      final sharedPrefs = await SharedPreferences.getInstance();
+      final userData = json.encode({
+        'token': _token,
+        'userId': _userId,
+        'expirationTime': _expirationTime.toIso8601String(),
+      });
+      sharedPrefs.setString('userData', userData);
     } on Exception catch (e) {
       throw e;
     }
+  }
+
+  Future<bool> autoLogIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey('userData')) {
+      final userData =
+          json.decode(prefs.getString('userData')) as Map<String, dynamic>;
+      final expirationDate = DateTime.parse(userData['expirationTime']);
+      if (expirationDate.isAfter(DateTime.now())) {
+        _token = userData['token'];
+        _userId = userData['userId'];
+        _expirationTime = userData['expirationTime'];
+        _autoLogOut();
+        notifyListeners();
+        return true;
+      }
+      return false;
+    }
+    return false;
+  }
+
+  void _autoLogOut() {
+    if (_authTimer != null) {
+      _authTimer.cancel();
+    }
+    _authTimer = Timer(
+        Duration(seconds: _expirationTime.difference(DateTime.now()).inSeconds),
+        logOut);
   }
 }

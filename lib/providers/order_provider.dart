@@ -20,10 +20,18 @@ class OrderProvider with ChangeNotifier {
   List<OrderItem> _orders = [];
 
   String _token;
+  String _userId;
 
   void setToken(String token) {
     if (_token != token) {
       _token = token;
+      notifyListeners();
+    }
+  }
+
+  void setUserId(String userId) {
+    if (_userId != userId) {
+      _userId = userId;
       notifyListeners();
     }
   }
@@ -42,7 +50,7 @@ class OrderProvider with ChangeNotifier {
 
   Future<void> fetchAndSetOrders(BuildContext context) async {
     final String url =
-        'https://shop-app-3529f.firebaseio.com/orders.json?auth=$_token';
+        'https://shop-app-3529f.firebaseio.com/orders/$_userId.json?auth=$_token';
 
     try {
       final resp = await http.get(url);
@@ -83,7 +91,7 @@ class OrderProvider with ChangeNotifier {
 
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
     final String url =
-        'https://shop-app-3529f.firebaseio.com/orders.json?auth=$_token';
+        'https://shop-app-3529f.firebaseio.com/orders/$_userId.json?auth=$_token';
     final timeStamp = DateTime.now();
     final value = await http.post(
       url,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/screens/products_overview_screen.dart';
+import 'package:shop_app/screens/splash_screen.dart';
 
 import './providers/auth.dart';
 import './screens/auth_screen.dart';
@@ -38,7 +39,8 @@ class MyApp extends StatelessWidget {
           create: (_) => OrderProvider(),
           update: (context, auth, previousOrders) => previousOrders
             ..setOrderList(previousOrders == null ? [] : previousOrders.orders)
-            ..setToken(auth.token),
+            ..setToken(auth.token)
+            ..setUserId(auth.userId),
         ),
       ],
       child: Consumer<Auth>(
@@ -49,7 +51,16 @@ class MyApp extends StatelessWidget {
             accentColor: Colors.deepOrangeAccent,
             fontFamily: 'Lato',
           ),
-          home: authData.isAuthorized ? ProductsOverviewScreen() : AuthScreen(),
+          home: authData.isAuthorized
+              ? ProductsOverviewScreen()
+              : FutureBuilder(
+                  future: authData.autoLogIn(),
+                  builder: (context, authResultSnapshot) =>
+                      authResultSnapshot.connectionState ==
+                              ConnectionState.waiting
+                          ? SplashScreen()
+                          : AuthScreen(),
+                ),
           routes: {
             ProductDetailScreen.routeName: (context) => ProductDetailScreen(),
             CartScreen.routeName: (context) => CartScreen(),
