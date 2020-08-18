@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop_app/models/custom_route.dart';
 import 'package:shop_app/providers/auth.dart';
 import 'package:shop_app/screens/orders_screen.dart';
 import 'package:shop_app/screens/product_management_screen.dart';
@@ -48,7 +49,11 @@ class MyDrawer extends StatelessWidget {
               title: Text('Payment'),
             ),
             onPressed: () {
-              Navigator.of(context).pushNamed(OrdersScreen.routeName);
+              Navigator.of(context).pushReplacement(
+                CustomRoute(
+                  builder: (ctx) => OrdersScreen(),
+                ),
+              );
             },
           ),
           FlatButton(

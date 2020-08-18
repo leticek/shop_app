@@ -96,6 +96,7 @@ class Auth with ChangeNotifier {
 
   Future<bool> autoLogIn() async {
     final prefs = await SharedPreferences.getInstance();
+
     if (prefs.containsKey('userData')) {
       final userData =
           json.decode(prefs.getString('userData')) as Map<String, dynamic>;
@@ -103,7 +104,7 @@ class Auth with ChangeNotifier {
       if (expirationDate.isAfter(DateTime.now())) {
         _token = userData['token'];
         _userId = userData['userId'];
-        _expirationTime = userData['expirationTime'];
+        _expirationTime = DateTime.parse(userData['expirationTime']);
         _autoLogOut();
         notifyListeners();
         return true;

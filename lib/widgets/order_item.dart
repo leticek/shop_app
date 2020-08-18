@@ -19,27 +19,33 @@ class _OrderItemState extends State<OrderItem> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.all(10),
-      child: Column(
-        children: [
-          ListTile(
-            title: Text('${widget.item.price.toStringAsFixed(2)}'),
-            subtitle: Text(
-              DateFormat('dd.MM.yyy hh:mm').format(widget.item.orderTime),
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 300),
+      height:
+          showMore ? min(widget.item.products.length * 20.0 + 110, 200) : 95,
+      child: Card(
+        margin: EdgeInsets.all(10),
+        child: Column(
+          children: [
+            ListTile(
+              title: Text('${widget.item.price.toStringAsFixed(2)}'),
+              subtitle: Text(
+                DateFormat('dd.MM.yyy hh:mm').format(widget.item.orderTime),
+              ),
+              trailing: IconButton(
+                  icon: Icon(showMore ? Icons.expand_less : Icons.expand_more),
+                  onPressed: () {
+                    setState(() {
+                      showMore = !showMore;
+                    });
+                  }),
             ),
-            trailing: IconButton(
-                icon: Icon(showMore ? Icons.expand_less : Icons.expand_more),
-                onPressed: () {
-                  setState(() {
-                    showMore = !showMore;
-                  });
-                }),
-          ),
-          if (showMore)
-            Container(
+            AnimatedContainer(
+              duration: Duration(milliseconds: 300),
               padding: EdgeInsets.all(10),
-              height: min(widget.item.products.length * 20.0 + 20, 180),
+              height: showMore
+                  ? min(widget.item.products.length * 20.0 + 15, 180)
+                  : 0,
               child: ListView(
                 children: widget.item.products
                     .map(
@@ -66,7 +72,8 @@ class _OrderItemState extends State<OrderItem> {
                     .toList(),
               ),
             )
-        ],
+          ],
+        ),
       ),
     );
   }
